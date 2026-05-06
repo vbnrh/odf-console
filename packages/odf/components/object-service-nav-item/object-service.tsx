@@ -200,12 +200,21 @@ const ObjectServicePage: React.FC = () => {
 };
 
 export const RerouteResource: React.FC<{}> = () => {
-  const { kind } = useParams();
+  const { kind, namespace } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    navigate(`/odf/object-storage/${kind}`);
-  }, [navigate, kind]);
+    const expectedPath = namespace
+      ? `/odf/resource/ns/${namespace}/${kind}`
+      : `/odf/resource/${kind}`;
+    if (
+      location.pathname === expectedPath ||
+      location.pathname === expectedPath + '/'
+    ) {
+      navigate(`/odf/object-storage/${kind}`);
+    }
+  }, [navigate, kind, namespace, location.pathname]);
   return null;
 };
 

@@ -85,7 +85,9 @@ type OBCStatusProps = {
 };
 
 export const OBCStatus: React.FC<OBCStatusProps> = ({ obc }) => (
-  <Status status={getPhase(obc)} />
+  <span data-test="resource-status">
+    <Status status={getPhase(obc)} />
+  </span>
 );
 
 const ObjectBucketClaimsList: React.FC<ObjectBucketClaimsListProps> = ({

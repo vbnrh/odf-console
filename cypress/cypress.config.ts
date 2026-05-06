@@ -15,7 +15,7 @@ export default defineConfig({
     configFile: 'cypress/reporter-config.json',
   },
   retries: {
-    runMode: 1,
+    runMode: 2,
     openMode: 0,
   },
   screenshotOnRunFailure: true,

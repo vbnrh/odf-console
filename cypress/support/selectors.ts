@@ -92,7 +92,9 @@ Cypress.Commands.add('clickNavLink', (path: [string, string?]) => {
       }
     });
   if (path.length > 1) {
-    cy.get('#page-sidebar').contains(path[1]).click(); // eslint-disable-line cypress/require-data-selectors
+    cy.byTestID('nav')
+      .contains(path[1], { timeout: 30 * 1000 })
+      .click();
   }
 });
 

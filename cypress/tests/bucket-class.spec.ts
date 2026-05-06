@@ -31,7 +31,6 @@ describe('Tests creation of Standard Bucket Class', () => {
   });
 
   afterEach(() => {
-    verifyBucketClass();
     deleteBucketClass();
   });
 
@@ -42,27 +41,32 @@ describe('Tests creation of Standard Bucket Class', () => {
   it('Create a 1 Tier(Spread) Bucket Class', () => {
     config.tiers = [Tier.SPREAD];
     createBucketClass(config);
+    verifyBucketClass();
   });
 
   it('Create a 1 Tier(Mirror) Bucket Class', () => {
     config.tiers = [Tier.MIRROR];
     createBucketClass(config);
+    verifyBucketClass();
   });
 
   it('Create a 2 Tier(Spread, Spread) Bucket Class', () => {
     config.tiers = [Tier.SPREAD, Tier.SPREAD];
     createBucketClass(config);
+    verifyBucketClass();
   });
 
   it('Create a 2 Tier(Spread, Mirror) Bucket Class', () => {
     config.tiers = [Tier.SPREAD, Tier.MIRROR];
     createBucketClass(config);
+    verifyBucketClass();
   });
 });
 
 describe('Tests creation of Namespace Bucket Class', () => {
+  const nsResources = ['ns1', 'ns2', 'ns3', 'ns4'];
   const config = new NamespaceBucketClassConfig(
-    ['ns1', 'ns2', 'ns3', 'ns4'],
+    nsResources,
     BucketClassType.NAMESPACE
   );
   before(() => {
@@ -74,7 +78,6 @@ describe('Tests creation of Namespace Bucket Class', () => {
   });
 
   afterEach(() => {
-    verifyBucketClass();
     deleteBucketClass();
   });
 
@@ -85,16 +88,19 @@ describe('Tests creation of Namespace Bucket Class', () => {
   it('Create a Single Namespace Bucket Class', () => {
     config.namespacePolicyType = NamespacePolicyType.SINGLE;
     createBucketClass(config);
+    verifyBucketClass();
   });
 
   it('Create a Multi Namespace Bucket Class', () => {
     config.namespacePolicyType = NamespacePolicyType.MULTI;
     createBucketClass(config);
+    verifyBucketClass();
   });
 
   it('Create a Cache Namespace Bucket Class', () => {
     config.namespacePolicyType = NamespacePolicyType.CACHE;
     createBucketClass(config);
+    verifyBucketClass();
   });
 });
 

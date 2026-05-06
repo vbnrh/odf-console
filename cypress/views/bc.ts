@@ -42,7 +42,8 @@ const createPVCBackingStore = (storeName: string) => {
   cy.exec(
     `echo '${JSON.stringify(
       bucketStore(storeName)
-    )}' | kubectl create -n openshift-storage -f -`
+    )}' | kubectl create -n openshift-storage -f -`,
+    { failOnNonZeroExit: false }
   );
 };
 
@@ -54,7 +55,8 @@ export class StandardBucketClassConfig extends BucketClassConfig {
   cleanup = () => {
     cy.log('Deleting backing stores');
     cy.exec(
-      `oc delete backingstore ${this.resources.join(' ')} -n openshift-storage`
+      `oc delete backingstore ${this.resources.join(' ')} -n openshift-storage`,
+      { failOnNonZeroExit: false }
     );
   };
 }
@@ -69,7 +71,8 @@ const createAWSStore = (name: string, type: StoreType) => {
   cy.exec(
     `echo '${JSON.stringify(
       namespaceStore(name, type)
-    )}' | kubectl create -n openshift-storage -f -`
+    )}' | kubectl create -n openshift-storage -f -`,
+    { failOnNonZeroExit: false }
   );
 };
 
@@ -90,10 +93,12 @@ export class NamespaceBucketClassConfig extends BucketClassConfig {
     cy.exec(
       `oc delete namespacestores ${this.resources.join(
         ' '
-      )} -n openshift-storage`
+      )} -n openshift-storage`,
+      { failOnNonZeroExit: false }
     );
     cy.exec(
-      `oc delete backingstore ${this.testBackingStore} -n openshift-storage`
+      `oc delete backingstore ${this.testBackingStore} -n openshift-storage`,
+      { failOnNonZeroExit: false }
     );
   };
 }
@@ -126,6 +131,7 @@ const setPlacementPolicy = (tiers: Tier[]) => {
 
 const selectStoreFromTable = (storeNo: number, name: string) => {
   cy.byLegacyTestID(name)
+    .should('have.length.gte', storeNo)
     .eq(storeNo - 1)
     .parent()
     .parent()

@@ -1,8 +1,13 @@
-import { pvc } from '../views/pvc';
+import { pvc, deletePVCFromCLI } from '../views/pvc';
 
 describe('Tests Expansion of a PVC', () => {
   beforeEach(() => {
     cy.clickNavLink(['Storage', 'PersistentVolumeClaims']);
+  });
+
+  after(() => {
+    deletePVCFromCLI('testpvcfs');
+    deletePVCFromCLI('testpvcrbd');
   });
 
   it('Test expansion of a CephFS PVC', () => {

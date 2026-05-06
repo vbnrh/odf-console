@@ -44,7 +44,11 @@ describe('Test Object Bucket Claim resource', () => {
   it('Test if Object Bucket Claim details page is rendered correctly', () => {
     cy.log('Test if OBC is bound');
     listPage.searchInList(OBC_NAME);
+    listPage.rows.shouldBeLoaded();
     cy.byTestID(`resource-link-${OBC_NAME}`).click();
+    cy.url().should('include', `/odf/resource/`, { timeout: MINUTE });
+    cy.url().should('include', OBC_NAME);
+    cy.byLegacyTestID('resource-title').should('contain', OBC_NAME);
     cy.byTestID('resource-status').contains(BOUND, { timeout: MINUTE });
 
     cy.log('Test if secret data is masked');
@@ -95,7 +99,7 @@ describe('Test Object Bucket Claim resource', () => {
     cy.byLegacyTestID(OBC_NAME).contains(OBC_NAME);
 
     cy.log('Test if status and storage class are shown correctly');
-    cy.byTestID('status-text').contains(BOUND);
+    cy.byTestID('resource-status').contains(BOUND);
     cy.byLegacyTestID('openshift-storage.noobaa.io').contains(
       OBC_STORAGE_CLASS_EXACT
     );

@@ -6,7 +6,7 @@ const configureKms = () => {
   cy.byTestID('kms-service-name-text').type('vault');
   cy.byTestID('vault-config-auth-method').select('token');
   cy.exec(
-    'echo http://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)'
+    'echo http://$(oc get route vault -n hashicorp --no-headers -o custom-columns=HOST:.spec.host)'
   ).then((hostname) => {
     cy.byTestID('kms-address-text').type(hostname.stdout);
   });
@@ -33,14 +33,14 @@ export const createStorageClass = (
 
   cy.log('Selecting Ceph RBD provisioner');
   cy.byTestID('storage-class-provisioner-dropdown').click();
-  cy.byLegacyTestID('dropdown-text-filter').type(
+  cy.byTestID('console-select-search-input').type(
     'openshift-storage.rbd.csi.ceph.com'
   );
-  cy.byTestID('dropdown-menu-item-link').should(
+  cy.byTestID('console-select-item').should(
     'contain',
     'openshift-storage.rbd.csi.ceph.com'
   );
-  cy.byTestID('dropdown-menu-item-link').click();
+  cy.byTestID('console-select-item').click();
 
   if (encrypted) {
     cy.log('Enabling encryption');
