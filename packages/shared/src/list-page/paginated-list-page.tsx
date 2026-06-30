@@ -22,6 +22,7 @@ export type PaginatedListPageProps = {
   countPerPage?: number;
   filteredData: K8sResourceCommon[] | unknown[];
   CreateButton?: React.FC<unknown>;
+  ToolbarActions?: React.FC<unknown>;
   Alerts?: React.FC<unknown>;
   noData?: boolean;
   hideFilter?: boolean;
@@ -36,18 +37,21 @@ export type PaginatedListPageProps = {
     | 'onSetPage'
     | 'onPerPageSelect'
   >;
+  onPaginatedDataChange?: (paginatedData: K8sResourceCommon[]) => void;
 };
 
 export const PaginatedListPage: React.FC<PaginatedListPageProps> = ({
   countPerPage,
   filteredData,
   CreateButton,
+  ToolbarActions,
   Alerts,
   noData,
   hideFilter,
   listPageFilterProps,
   composableTableProps,
   paginationProps,
+  onPaginatedDataChange,
 }) => {
   const [page, setPage] = React.useState(INITIAL_PAGE_NUMBER);
   const [perPage, setPerPage] = React.useState(
@@ -59,13 +63,18 @@ export const PaginatedListPage: React.FC<PaginatedListPageProps> = ({
     return filteredData.slice(start, end) || [];
   }, [filteredData, page, perPage]);
 
+  React.useEffect(() => {
+    onPaginatedDataChange?.(paginatedData as K8sResourceCommon[]);
+  }, [paginatedData, onPaginatedDataChange]);
+
   return (
     <ListPageBody>
       {!noData && (
         <>
           <Grid>
             <GridItem md={8} sm={12} className="pf-v6-u-mt-md">
-              <div className="pf-v6-u-display-flex pf-v6-u-flex-direction-column pf-v6-u-flex-direction-row-on-md">
+              <div className="pf-v6-u-display-flex pf-v6-u-flex-direction-column pf-v6-u-flex-direction-row-on-md pf-v6-u-align-items-center">
+                {!!ToolbarActions && <ToolbarActions />}
                 {!hideFilter && (
                   <ListPageFilterWrapper
                     {...listPageFilterProps}

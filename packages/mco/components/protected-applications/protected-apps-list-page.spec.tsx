@@ -29,6 +29,7 @@ const failingDRPC = {
   metadata: {
     name: failingDRPCName,
     namespace: 'test',
+    uid: 'drpc-uid-1',
     annotations: {
       'drplacementcontrol.ramendr.openshift.io/last-app-deployment-cluster':
         deploymentClusterName,
@@ -57,6 +58,7 @@ const relocatedDRPC = {
   metadata: {
     name: relocatedDRPCName,
     namespace: 'test',
+    uid: 'drpc-uid-2',
     annotations: {
       'drplacementcontrol.ramendr.openshift.io/last-app-deployment-cluster':
         deploymentClusterName,
@@ -92,7 +94,7 @@ const drPolicy = {
 const failingPAV = {
   apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
   kind: 'ProtectedApplicationView',
-  metadata: { name: failingDRPCName, namespace: 'test' },
+  metadata: { name: failingDRPCName, namespace: 'test', uid: 'pav-uid-1' },
   spec: { drpcRef: { name: failingDRPCName, namespace: 'test' } },
   status: {
     applicationInfo: {
@@ -123,7 +125,7 @@ const failingPAV = {
 const relocatedPAV = {
   apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
   kind: 'ProtectedApplicationView',
-  metadata: { name: relocatedDRPCName, namespace: 'test' },
+  metadata: { name: relocatedDRPCName, namespace: 'test', uid: 'pav-uid-2' },
   spec: { drpcRef: { name: relocatedDRPCName, namespace: 'test' } },
   status: {
     applicationInfo: {
@@ -397,5 +399,85 @@ describe('Test protected applications list page table row (ProtectedAppsTableRow
     expect(screen.getByText(namespaces[1])).toBeInTheDocument();
     expect(screen.getByText(namespaces[2])).toBeInTheDocument();
     expect(screen.getByText(namespaces[3])).toBeInTheDocument();
+  });
+});
+
+describe('Test selection mechanics (RHSTOR-6406)', () => {
+  let user;
+  beforeEach(() => {
+    user = userEvent.setup();
+    resetGlobals();
+  });
+  afterEach(() => jest.clearAllMocks());
+  beforeAll(() => ignoreErrors());
+  afterAll(() => consoleSpy.mockRestore());
+
+  it('Renders checkboxes for each row', () => {
+    render(<ProtectedApplicationsListPage />);
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('FailingOver row has disabled checkbox, Relocated row has enabled checkbox', () => {
+    const { container } = render(<ProtectedApplicationsListPage />);
+
+    const checkboxes = container.querySelectorAll(
+      'tbody tr input[type="checkbox"]'
+    );
+    expect(checkboxes.length).toBeGreaterThanOrEqual(2);
+
+    const failingCheckbox = Array.from(checkboxes).find((cb) => {
+      const row = cb.closest('tr');
+      return row?.textContent?.includes(failingDRPCName);
+    }) as HTMLInputElement;
+
+    const relocatedCheckbox = Array.from(checkboxes).find((cb) => {
+      const row = cb.closest('tr');
+      return row?.textContent?.includes(relocatedDRPCName);
+    }) as HTMLInputElement;
+
+    expect(failingCheckbox).toBeDefined();
+    expect(failingCheckbox.disabled).toBe(true);
+
+    expect(relocatedCheckbox).toBeDefined();
+    expect(relocatedCheckbox.disabled).toBe(false);
+  });
+
+  it('Failover/Relocate button is disabled when no rows are selected', () => {
+    render(<ProtectedApplicationsListPage />);
+
+    const button = screen.getByRole('button', { name: /Failover\/Relocate/i });
+    expect(button).toBeDisabled();
+  });
+
+  it('Failover/Relocate button enables after selecting an eligible row', async () => {
+    const { container } = render(<ProtectedApplicationsListPage />);
+
+    const button = screen.getByRole('button', { name: /Failover\/Relocate/i });
+    expect(button).toBeDisabled();
+
+    const relocatedCheckbox = Array.from(
+      container.querySelectorAll('tbody tr input[type="checkbox"]')
+    ).find((cb) => {
+      const row = cb.closest('tr');
+      return row?.textContent?.includes(relocatedDRPCName);
+    }) as HTMLInputElement;
+
+    await user.click(relocatedCheckbox);
+    expect(button).toBeEnabled();
+  });
+
+  it('Bulk selector dropdown renders with correct options', async () => {
+    render(<ProtectedApplicationsListPage />);
+
+    const bulkToggle = screen.getByRole('button', {
+      name: /Bulk selection/i,
+    });
+    await user.click(bulkToggle);
+
+    expect(screen.getByText('Select none (0 items)')).toBeInTheDocument();
+    expect(screen.getByText(/Select page \(\d+ items?\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Select all \(\d+ items?\)/)).toBeInTheDocument();
   });
 });
